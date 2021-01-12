@@ -22,6 +22,9 @@ public class Player : MonoBehaviour
 
     private bool _isReloading = false;
 
+    [SerializeField]
+    public bool hasCoin = false;
+
     private UIManager _uiManager;
     // private float fireRate = 0.5f;
     // private float nextFire;
