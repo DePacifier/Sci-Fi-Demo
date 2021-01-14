@@ -8,7 +8,12 @@ public class Player : MonoBehaviour
     private CharacterController _controller;
     [SerializeField]
     private float _speed = 3.5f;
-    private float _gravity = 9.81f;
+    [SerializeField]
+    private float _gravity = -9.81f;
+    [SerializeField]
+    private float _jumpHeight = 1.0f;
+    [SerializeField]
+    private Vector3 playerVelocity;
     
     [SerializeField]
     private GameObject _muzzleFlash;
@@ -16,6 +21,8 @@ public class Player : MonoBehaviour
     private GameObject _hitMarkerPrefab;
     [SerializeField]
     private AudioSource _weaponAudio;
+    [SerializeField]
+    private GameObject _weapon;
     [SerializeField]
     private int currentAmmo;
     private int maxAmmo = 50;
@@ -44,24 +51,27 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(0) && currentAmmo > 0)
+        if (_weapon.activeInHierarchy)
         {
-            // && Time.time > nextFire
-            // nextFire = Time.time + fireRate;
-            shoot();
-        }
-        else
-        {
-            _muzzleFlash.SetActive(false);
-            _weaponAudio.Stop();
+            if (Input.GetMouseButton(0) && currentAmmo > 0)
+            {
+                // && Time.time > nextFire
+                // nextFire = Time.time + fireRate;
+                shoot();
+            }
+            else
+            {
+                _muzzleFlash.SetActive(false);
+                _weaponAudio.Stop();
+            }
+
+            if (Input.GetKeyDown(KeyCode.R) && _isReloading == false)
+            {
+                _isReloading = true;
+                StartCoroutine(Reload());
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.R) && _isReloading == false)
-        {
-            _isReloading = true;
-            StartCoroutine(Reload());
-        }
-        
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
@@ -76,11 +86,13 @@ public class Player : MonoBehaviour
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
         Vector3 direction = new Vector3(horizontalInput, 0, verticalInput);
+        
         Vector3 velocity = direction * _speed;
-        velocity.y -= _gravity;
-
+        velocity.y -= _gravity * -1;
         velocity = transform.transform.TransformDirection(velocity);
+        
         _controller.Move(velocity * Time.deltaTime);
+
     }
 
     void shoot()
@@ -109,5 +121,10 @@ public class Player : MonoBehaviour
         currentAmmo = maxAmmo;
         _uiManager.UpdateAmmo(currentAmmo);
         _isReloading = false;
+    }
+
+    public void EnableWeapon()
+    {
+        _weapon.SetActive(true);
     }
 }
